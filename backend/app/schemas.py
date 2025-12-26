@@ -16,8 +16,11 @@ class CategoryUpdate(BaseModel):
     color: Optional[str] = None
 
 
-class CategoryResponse(CategoryBase):
+class CategoryResponse(BaseModel):
     id: int
+    name: str
+    color: str | None
+    flag_aktif: bool
     created_at: datetime
 
     class Config:

@@ -23,8 +23,7 @@ def create_session(db: Session, data: FocusSessionCreate):
 def get_sessions(db: Session):
     return (
         db.query(FocusSession)
-        .options(joinedload(FocusSession.category))
-        .order_by(FocusSession.start_time.desc())
+        .order_by(FocusSession.created_at.desc())
         .all()
     )
 
@@ -52,17 +51,33 @@ def delete_session(db: Session, session_id: int):
     return True
 
 def create_category(db: Session, data: CategoryCreate):
-    category = Category(**data.dict())
+    category = Category(
+        name=data.name,
+        color=data.color,
+        flag_aktif=True
+    )
     db.add(category)
     db.commit()
     db.refresh(category)
     return category
 
 def get_categories(db: Session):
-    return db.query(Category).order_by(Category.name.asc()).all()
+    return (
+        db.query(Category)
+        .filter(Category.flag_aktif == True)
+        .order_by(Category.created_at.desc())
+        .all()
+    )
 
 def get_category(db: Session, category_id: int):
-    return db.query(Category).filter(Category.id == category_id).first()
+    return (
+        db.query(Category)
+        .filter(
+            Category.id == category_id,
+            Category.flag_aktif == True
+        )
+        .first()
+    )
 
 def update_category(db: Session, category_id: int, data: CategoryUpdate):
     category = get_category(db, category_id)
@@ -77,13 +92,10 @@ def update_category(db: Session, category_id: int, data: CategoryUpdate):
     return category
 
 def delete_category(db: Session, category_id: int):
-    category = get_category(db, category_id)
+    category = db.query(Category).filter(Category.id == category_id).first()
     if not category:
         return False
 
-    if category.sessions:
-        raise ValueError("Category is still used by focus sessions")
-
-    db.delete(category)
+    category.flag_aktif = False
     db.commit()
     return True
