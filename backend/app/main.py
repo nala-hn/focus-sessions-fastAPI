@@ -1,6 +1,10 @@
 from fastapi import FastAPI
-from .routes import router
 from fastapi.middleware.cors import CORSMiddleware
+from .routes import router
+from .database import engine
+from . import models  
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Focus Tracker API (FastAPI)")
 
