@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
-from .models import FocusSession
+from .models import FocusSession, Category
 from datetime import datetime
-from .schemas import FocusSessionCreate
+from .schemas import FocusSessionCreate, CategoryCreate, CategoryUpdate
 
 
 def create_session(db: Session, data: FocusSessionCreate):
@@ -48,5 +48,42 @@ def delete_session(db: Session, session_id: int):
         return None
 
     db.delete(session)
+    db.commit()
+    return True
+
+def create_category(db: Session, data: CategoryCreate):
+    category = Category(**data.dict())
+    db.add(category)
+    db.commit()
+    db.refresh(category)
+    return category
+
+def get_categories(db: Session):
+    return db.query(Category).order_by(Category.name.asc()).all()
+
+def get_category(db: Session, category_id: int):
+    return db.query(Category).filter(Category.id == category_id).first()
+
+def update_category(db: Session, category_id: int, data: CategoryUpdate):
+    category = get_category(db, category_id)
+    if not category:
+        return None
+
+    for field, value in data.dict(exclude_unset=True).items():
+        setattr(category, field, value)
+
+    db.commit()
+    db.refresh(category)
+    return category
+
+def delete_category(db: Session, category_id: int):
+    category = get_category(db, category_id)
+    if not category:
+        return False
+
+    if category.sessions:
+        raise ValueError("Category is still used by focus sessions")
+
+    db.delete(category)
     db.commit()
     return True

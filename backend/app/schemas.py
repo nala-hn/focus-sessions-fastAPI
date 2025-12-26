@@ -2,11 +2,6 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-
-# =====================
-# CATEGORY SCHEMAS
-# =====================
-
 class CategoryBase(BaseModel):
     name: str
     color: Optional[str] = None
@@ -16,17 +11,17 @@ class CategoryCreate(CategoryBase):
     pass
 
 
+class CategoryUpdate(BaseModel):
+    name: Optional[str] = None
+    color: Optional[str] = None
+
+
 class CategoryResponse(CategoryBase):
     id: int
     created_at: datetime
 
     class Config:
         from_attributes = True
-
-
-# =====================
-# FOCUS SESSION SCHEMAS
-# =====================
 
 class FocusSessionBase(BaseModel):
     title: str
@@ -48,7 +43,7 @@ class FocusSessionResponse(BaseModel):
     duration_minutes: Optional[int]
     created_at: datetime
 
-    category: CategoryResponse  # WAJIB ADA
+    category: CategoryResponse 
 
     class Config:
         from_attributes = True
