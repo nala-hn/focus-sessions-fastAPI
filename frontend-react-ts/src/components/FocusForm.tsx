@@ -1,106 +1,65 @@
 import { useEffect, useState } from "react"
 import { getCategories, createSession } from "../api/referensiAPI"
+import type { Category } from "../types/focus"
 
-interface Category {
-  id: number
-  name: string
-  color?: string
-}
-
-interface FocusFormProps {
-  onSuccess?: () => void
-}
-
-export default function FocusForm({ onSuccess }: FocusFormProps) {
+export default function FocusForm({ onSuccess }: { onSuccess: () => void }) {
   const [title, setTitle] = useState("")
-  const [categoryId, setCategoryId] = useState<number | "">("")
   const [categories, setCategories] = useState<Category[]>([])
+  const [categoryId, setCategoryId] = useState<number | "">("")
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await getCategories()
-        setCategories(res.data)
-      } catch (err) {
-        console.error(err)
-        setError("Failed to load categories")
-      }
-    }
-
-    fetchCategories()
+    getCategories().then(res => setCategories(res.data))
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleStart = async () => {
+    if (!title || !categoryId) return
 
-    if (!title || !categoryId) {
-      setError("Title and category are required")
-      return
-    }
+    setLoading(true)
+    await createSession({
+      title,
+      category_id: Number(categoryId),
+    })
 
-    try {
-      setLoading(true)
-      setError(null)
-
-      await createSession({
-        title,
-        category_id: Number(categoryId),
-      })
-
-      setTitle("")
-      setCategoryId("")
-
-      onSuccess?.()
-    } catch (err) {
-      console.error(err)
-      setError("Failed to create focus session")
-    } finally {
-      setLoading(false)
-    }
+    setTitle("")
+    setCategoryId("")
+    setLoading(false)
+    onSuccess()
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
-      <h3>Create Focus Session</h3>
+    <div className="bg-white rounded-2xl shadow-lg p-6 space-y-4">
+      <h2 className="text-xl font-semibold text-gray-800">
+        🚀 Start Focus Session
+      </h2>
 
-      {error && (
-        <p style={{ color: "red", marginBottom: 8 }}>
-          {error}
-        </p>
-      )}
+      <input
+        className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400"
+        placeholder="What are you working on?"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
 
-      <div style={{ marginBottom: 12 }}>
-        <label>Title</label>
-        <br />
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="What are you focusing on?"
-        />
-      </div>
+      <select
+        className="w-full border rounded-lg px-4 py-2 bg-white"
+        value={categoryId}
+        onChange={(e) => setCategoryId(Number(e.target.value))}
+      >
+        <option value="">Select category</option>
+        {categories.map(c => (
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
 
-      <div style={{ marginBottom: 12 }}>
-        <label>Category</label>
-        <br />
-        <select
-          value={categoryId}
-          onChange={(e) => setCategoryId(Number(e.target.value))}
-        >
-          <option value="">-- Select category --</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <button type="submit" disabled={loading}>
-        {loading ? "Saving..." : "Start Focus"}
+      <button
+        onClick={handleStart}
+        disabled={loading}
+        className="w-full bg-pink-500 text-white py-2 rounded-xl font-semibold hover:bg-pink-600 transition"
+      >
+        {loading ? "Starting..." : "Start Focus"}
       </button>
-    </form>
+    </div>
   )
 }
