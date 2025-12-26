@@ -1,27 +1,54 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-class CategoryResponse(BaseModel):
-    id: int
+
+# =====================
+# CATEGORY SCHEMAS
+# =====================
+
+class CategoryBase(BaseModel):
     name: str
-    color: str | None = None
+    color: Optional[str] = None
 
-    model_config = ConfigDict(from_attributes=True)
 
-class FocusSessionCreate(BaseModel):
+class CategoryCreate(CategoryBase):
+    pass
+
+
+class CategoryResponse(CategoryBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# =====================
+# FOCUS SESSION SCHEMAS
+# =====================
+
+class FocusSessionBase(BaseModel):
     title: str
     category_id: int
     start_time: datetime
-    end_time: datetime | None = None
+    end_time: Optional[datetime] = None
+    duration_minutes: Optional[int] = None
+
+
+class FocusSessionCreate(FocusSessionBase):
+    pass
 
 
 class FocusSessionResponse(BaseModel):
     id: int
     title: str
     start_time: datetime
-    end_time: datetime | None
-    duration_minutes: int | None
-    category: CategoryResponse
+    end_time: Optional[datetime]
+    duration_minutes: Optional[int]
+    created_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+    category: CategoryResponse  # WAJIB ADA
+
+    class Config:
+        from_attributes = True

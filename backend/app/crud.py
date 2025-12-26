@@ -1,22 +1,32 @@
-from sqlalchemy.orm import Session
-from datetime import datetime
-
+from sqlalchemy.orm import Session, joinedload
 from .models import FocusSession
+from datetime import datetime
 from .schemas import FocusSessionCreate
 
+
 def create_session(db: Session, data: FocusSessionCreate):
-    session = FocusSession(
-        title=data.title,
-        category=data.category,
-        start_time=data.start_time
-    )
+    session = FocusSession(**data.dict())
     db.add(session)
     db.commit()
     db.refresh(session)
+
+    session = (
+        db.query(FocusSession)
+        .options(joinedload(FocusSession.category))
+        .filter(FocusSession.id == session.id)
+        .first()
+    )
+
     return session
 
+
 def get_sessions(db: Session):
-    return db.query(FocusSession).all()
+    return (
+        db.query(FocusSession)
+        .options(joinedload(FocusSession.category))
+        .order_by(FocusSession.start_time.desc())
+        .all()
+    )
 
 def stop_session(db: Session, session_id: int):
     session = db.query(FocusSession).get(session_id)
