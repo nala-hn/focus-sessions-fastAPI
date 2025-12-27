@@ -19,23 +19,23 @@ export default function ActiveSessionCard({ session, onStop, now }: ActiveSessio
   return (
     <div
       key={session.id}
-      className="flex justify-between items-center"
+      className="justify-center items-center"
     >
       <div>
-        <p className="text-pink-500 font-mono text-2xl md:text-7xl mt-2 font-bold justify-center">
+        <p className="text-pink-500 font-mono text-5xl md:text-7xl font-bold text-center">
           {calcDuration(session.start_time)}
         </p>
         <div style={{ display: "flex", justifyContent: "center", gap: "4px", marginTop: "8px" }}>
           <div className="badge badge-soft badge-primary">{session.title}</div>
-          <div className="badge badge-outline badge-primary">{session.category.name}</div>
+          <div className="badge badge-soft badge-warning">{session.category.name}</div>
+          <div
+            onClick={() => onStop(session.id)}
+            className="badge badge-soft badge-error cursor-pointer"
+          >
+            Stop
+          </div>
         </div>
       </div>
-      <button
-        onClick={() => onStop(session.id)}
-        className="bg-gray-800 text-white px-4 py-2 rounded-lg"
-      >
-        Stop
-      </button>
     </div>
   );
 }
