@@ -2,25 +2,32 @@ import React, { useState } from 'react';
 import { login } from '../api/authApi';
 import { useNavigate } from 'react-router-dom';
 
-const LoginForm: React.FC = () => {
+interface LoginFormProps {
+  setAlert: (alert: { type: 'success' | 'error'; message: string } | null) => void;
+}
+
+const LoginForm: React.FC<LoginFormProps> = ({ setAlert }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setAlert(null);
     try {
       const data = await login({ username, password });
       localStorage.setItem('token', data.access_token);
       navigate('/');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error);
+      const errorMessage = error.response?.data?.detail || 'Login failed. Please try again.';
+      setAlert({ type: 'error', message: errorMessage });
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-        <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+        <fieldset className="fieldset bg-white/30 backdrop-blur-md rounded-2xl ring-2 ring-white/50 shadow-lg shadow-white/80 p-6 space-y-4">
             <legend className="fieldset-legend">Login</legend>
 
             <label className="label">Username</label>
