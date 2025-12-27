@@ -40,34 +40,37 @@ export default function FocusPage() {
     setShowModal(true);
   };
 
+  const activeSessions = sessions.filter((s) => !s.end_time);
+  const finishedSessions = sessions.filter((s) => s.end_time);
+
   return (
     <div className="min-h-screen gradient-bg-animated p-6">
-      <div className="max-w-xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         <div className="bg-white/30 backdrop-blur-md rounded-2xl ring-2 ring-white/50 shadow-lg shadow-white/80 p-6 space-y-4">
           <FocusForm onSuccess={fetchSessions} />
 
-          <div className="divider divider-info"></div>
+          {activeSessions.map((s) => (
+            <>
+              <div className="divider divider-info"></div>
+              <ActiveSessionCard
+                key={s.id}
+                session={s}
+                onStop={handleStopSession}
+                now={now}
+              />
+              <div className="divider divider-warning"></div>
+            </>
+          ))}
 
-          {sessions.map((s) =>
-            !s.end_time ? (
-              <>
-                <ActiveSessionCard
-                  key={s.id}
-                  session={s}
-                  onStop={handleStopSession}
-                  now={now}
-                />
-
-                <div className="divider divider-warning" />
-              </>
-            ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {finishedSessions.map((s) => (
               <SessionHistoryCard
                 key={s.id}
                 session={s}
                 onDelete={openDeleteModal}
               />
-            )
-          )}
+            ))}
+          </div>
         </div>
       </div>
 
