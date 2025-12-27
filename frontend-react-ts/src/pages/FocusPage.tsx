@@ -38,7 +38,7 @@ export default function FocusPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 p-6">
+    <div className="min-h-screen gradient-bg-animated p-6">
       <div className="max-w-xl mx-auto space-y-6">
         <div className="bg-white/30 backdrop-blur-md rounded-2xl ring-2 ring-white/50 shadow-lg shadow-white/80 p-6 space-y-4">
           <FocusForm onSuccess={fetchSessions} />
