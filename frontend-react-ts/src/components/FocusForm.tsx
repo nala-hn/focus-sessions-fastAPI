@@ -29,8 +29,8 @@ export default function FocusForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <>
-      <h2 className="text-xl font-semibold text-gray-800">
-        🚀 Start Focus Session
+      <h2 className="text-5xl font-bold text-[#f7c7e1] text-center mb-4 chango-regular" style={{ WebkitTextStroke: "1px #c3428c", textShadow: '2px 2px 4px rgba(71, 65, 65, 0.5)' }}>
+        FOCUS FLOW
       </h2>
 
       <input type="text" className="input input-md w-full"
