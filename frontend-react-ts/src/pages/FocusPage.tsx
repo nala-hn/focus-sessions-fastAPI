@@ -40,44 +40,46 @@ export default function FocusPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 p-6">
       <div className="max-w-xl mx-auto space-y-6">
-        <FocusForm onSuccess={fetchSessions} />
+        <div className="bg-white/30 backdrop-blur-md rounded-2xl ring-2 ring-white/50 shadow-lg shadow-white/80 p-6 space-y-4">
+          <FocusForm onSuccess={fetchSessions} />
 
-        {sessions.map((s) => (
-          <div
-            key={s.id}
-            className="bg-white rounded-xl p-4 shadow flex justify-between items-center"
-          >
-            <div>
-              <h3 className="font-semibold">{s.title}</h3>
-              <p className="text-sm text-gray-500">{s.category.name}</p>
+          {sessions.map((s) => (
+            <div
+              key={s.id}
+              className="bg-white rounded-xl p-4 shadow flex justify-between items-center"
+            >
+              <div>
+                <h3 className="font-semibold">{s.title}</h3>
+                <p className="text-sm text-gray-500">{s.category.name}</p>
 
-              {!s.end_time && (
-                <p className="text-pink-500 font-mono">
-                  ⏱ {calcDuration(s.start_time)}
-                </p>
+                {!s.end_time && (
+                  <p className="text-pink-500 font-mono">
+                    ⏱ {calcDuration(s.start_time)}
+                  </p>
+                )}
+              </div>
+
+              {!s.end_time ? (
+                <button
+                  onClick={() => stopSession(s.id).then(fetchSessions)}
+                  className="bg-gray-800 text-white px-4 py-2 rounded-lg"
+                >
+                  Stop
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setSelectedSessionId(s.id);
+                    setShowModal(true);
+                  }}
+                  className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                >
+                  Delete
+                </button>
               )}
             </div>
-
-            {!s.end_time ? (
-              <button
-                onClick={() => stopSession(s.id).then(fetchSessions)}
-                className="bg-gray-800 text-white px-4 py-2 rounded-lg"
-              >
-                Stop
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  setSelectedSessionId(s.id);
-                  setShowModal(true);
-                }}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg"
-              >
-                Delete
-              </button>
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {showModal && (

@@ -28,7 +28,7 @@ export default function FocusForm({ onSuccess }: { onSuccess: () => void }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 space-y-4">
+    <>
       <h2 className="text-xl font-semibold text-gray-800">
         🚀 Start Focus Session
       </h2>
@@ -57,10 +57,10 @@ export default function FocusForm({ onSuccess }: { onSuccess: () => void }) {
       <button
         onClick={handleStart}
         disabled={loading}
-        className="w-full bg-pink-500 text-white py-2 rounded-xl font-semibold hover:bg-pink-600 transition"
+        className="relative w-full bg-purple-400/80 text-white py-3 rounded-2xl font-semibold backdrop-blur-md ring-1 ring-white/40 shadow-lg shadow-purple-500/40 hover:bg-purple-500/80 transition"
       >
         {loading ? "Starting..." : "Start Focus"}
       </button>
-    </div>
+    </>
   )
 }
