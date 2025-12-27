@@ -1,12 +1,38 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from .routes import router
 from .database import engine
-from . import models  
+from . import models
+from .schemas import StandardResponse
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Focus Tracker API (FastAPI)")
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=StandardResponse(
+            code=exc.status_code,
+            result="Gagal",
+            detail=exc.detail,
+            data=None
+        ).dict(),
+    )
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content=StandardResponse(
+            code=500,
+            result="Gagal",
+            detail=str(exc),
+            data=None
+        ).dict(),
+    )
 
 app.add_middleware(
     CORSMiddleware,
