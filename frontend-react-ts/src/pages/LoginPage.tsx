@@ -17,23 +17,14 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center h-screen bg-purple-300">
+    <div className="flex flex-col justify-center items-center min-h-screen gradient-bg-animated p-6">
       {alert && <Alert type={alert.type} message={alert.message} />}
       <div className="mt-4">
         {isRegistering ? (
-          <RegisterForm onRegisterSuccess={handleRegisterSuccess} setAlert={setAlert} />
+          <RegisterForm onRegisterSuccess={handleRegisterSuccess} setAlert={setAlert} setIsRegistering={setIsRegistering} />
         ) : (
-          <LoginForm setAlert={setAlert} />
+          <LoginForm setAlert={setAlert} setIsRegistering={setIsRegistering} />
         )}
-        <div className="text-center mt-4">
-          <a href="#" className="link" onClick={(e) => {
-            e.preventDefault();
-            setIsRegistering(!isRegistering);
-            setAlert(null);
-          }}>
-            {isRegistering ? 'Or login' : 'Or register'}
-          </a>
-        </div>
       </div>
     </div>
   );
