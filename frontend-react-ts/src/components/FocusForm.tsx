@@ -33,19 +33,20 @@ export default function FocusForm({ onSuccess }: { onSuccess: () => void }) {
         🚀 Start Focus Session
       </h2>
 
-      <input
-        className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400"
+      <input type="text" className="input input-md w-full"
         placeholder="What are you working on?"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
 
       <select
-        className="w-full border rounded-lg px-4 py-2 bg-white"
+        className="select select-bordered w-full"
         value={categoryId}
         onChange={(e) => setCategoryId(Number(e.target.value))}
       >
-        <option value="">Select category</option>
+        <option value="" disabled>
+          Select category
+        </option>
         {categories.map(c => (
           <option key={c.id} value={c.id}>
             {c.name}
