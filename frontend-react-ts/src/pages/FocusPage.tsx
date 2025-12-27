@@ -3,6 +3,8 @@ import FocusForm from "../components/FocusForm";
 import { getSessions, stopSession, deleteSession } from "../api/referensiAPI";
 import type { FocusSession } from "../types/focus";
 import ConfirmationModal from "../components/ConfirmationModal";
+import ActiveSessionCard from "../components/ActiveSessionCard";
+import SessionHistoryCard from "../components/SessionHistoryCard";
 
 export default function FocusPage() {
   const [sessions, setSessions] = useState<FocusSession[]>([]);
@@ -21,20 +23,21 @@ export default function FocusPage() {
     return () => clearInterval(timer);
   }, []);
 
-  const calcDuration = (start: string) => {
-    const startTime = new Date(start + "Z");
-    const diff = Math.floor((now - startTime.getTime()) / 1000);
-    const h = Math.floor(diff / 3600);
-    const m = Math.floor((diff % 3600) / 60);
-    const s = diff % 60;
-    return `${h}h ${m}m ${s}s`;
+  const handleStopSession = (id: number) => {
+    stopSession(id).then(fetchSessions);
   };
 
   const handleDelete = async () => {
     if (selectedSessionId) {
       await deleteSession(selectedSessionId);
       fetchSessions();
+      setShowModal(false);
     }
+  };
+
+  const openDeleteModal = (id: number) => {
+    setSelectedSessionId(id);
+    setShowModal(true);
   };
 
   return (
@@ -43,42 +46,28 @@ export default function FocusPage() {
         <div className="bg-white/30 backdrop-blur-md rounded-2xl ring-2 ring-white/50 shadow-lg shadow-white/80 p-6 space-y-4">
           <FocusForm onSuccess={fetchSessions} />
 
-          {sessions.map((s) => (
-            <div
-              key={s.id}
-              className="bg-white rounded-xl p-4 shadow flex justify-between items-center"
-            >
-              <div>
-                <h3 className="font-semibold">{s.title}</h3>
-                <p className="text-sm text-gray-500">{s.category.name}</p>
+          <div className="divider divider-info"></div>
 
-                {!s.end_time && (
-                  <p className="text-pink-500 font-mono">
-                    ⏱ {calcDuration(s.start_time)}
-                  </p>
-                )}
-              </div>
+          {sessions.map((s) =>
+            !s.end_time ? (
+              <>
+                <ActiveSessionCard
+                  key={s.id}
+                  session={s}
+                  onStop={handleStopSession}
+                  now={now}
+                />
 
-              {!s.end_time ? (
-                <button
-                  onClick={() => stopSession(s.id).then(fetchSessions)}
-                  className="bg-gray-800 text-white px-4 py-2 rounded-lg"
-                >
-                  Stop
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    setSelectedSessionId(s.id);
-                    setShowModal(true);
-                  }}
-                  className="bg-red-500 text-white px-4 py-2 rounded-lg"
-                >
-                  Delete
-                </button>
-              )}
-            </div>
-          ))}
+                <div className="divider divider-warning" />
+              </>
+            ) : (
+              <SessionHistoryCard
+                key={s.id}
+                session={s}
+                onDelete={openDeleteModal}
+              />
+            )
+          )}
         </div>
       </div>
 

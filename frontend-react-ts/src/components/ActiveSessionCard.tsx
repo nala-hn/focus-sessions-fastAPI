@@ -1,49 +1,41 @@
-import { useEffect, useState } from "react"
+import type { FocusSession } from "../types/focus";
 
-interface Props {
-  title: string
-  startTime: string
-  categoryName: string
-  onStop: () => void
+interface ActiveSessionCardProps {
+  session: FocusSession;
+  onStop: (id: number) => void;
+  now: number;
 }
 
-export default function ActiveSessionCard({
-  title,
-  startTime,
-  categoryName,
-  onStop,
-}: Props) {
-  const [elapsed, setElapsed] = useState(0)
-
-  useEffect(() => {
-    const start = new Date(startTime).getTime()
-
-    const interval = setInterval(() => {
-      const now = Date.now()
-      setElapsed(Math.floor((now - start) / 1000))
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [startTime])
-
-  const formatTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600)
-    const m = Math.floor((seconds % 3600) / 60)
-    const s = seconds % 60
-
-    return `${h}h ${m}m ${s}s`
-  }
+export default function ActiveSessionCard({ session, onStop, now }: ActiveSessionCardProps) {
+  const calcDuration = (start: string) => {
+    const startTime = new Date(start + "Z");
+    const diff = Math.floor((now - startTime.getTime()) / 1000);
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+    return `${h}h ${m}m ${s}s`;
+  };
 
   return (
-    <div className="active-card">
-      <h3>{title}</h3>
-      <p>{categoryName}</p>
-
-      <h1>{formatTime(elapsed)}</h1>
-
-      <button className="stop-btn" onClick={onStop}>
-        Stop Focus
+    <div
+      key={session.id}
+      className="flex justify-between items-center"
+    >
+      <div>
+        <p className="text-pink-500 font-mono text-2xl md:text-7xl mt-2 font-bold justify-center">
+          {calcDuration(session.start_time)}
+        </p>
+        <div style={{ display: "flex", justifyContent: "center", gap: "4px", marginTop: "8px" }}>
+          <div className="badge badge-soft badge-primary">{session.title}</div>
+          <div className="badge badge-outline badge-primary">{session.category.name}</div>
+        </div>
+      </div>
+      <button
+        onClick={() => onStop(session.id)}
+        className="bg-gray-800 text-white px-4 py-2 rounded-lg"
+      >
+        Stop
       </button>
     </div>
-  )
+  );
 }
