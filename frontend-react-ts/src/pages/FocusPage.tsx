@@ -17,7 +17,8 @@ export default function FocusPage() {
   }, [])
 
   const calcDuration = (start: string) => {
-    const diff = Math.floor((now - new Date(start).getTime()) / 1000)
+    const startTime = new Date(start + "Z");
+    const diff = Math.floor((now - startTime.getTime()) / 1000)
     const h = Math.floor(diff / 3600)
     const m = Math.floor((diff % 3600) / 60)
     const s = diff % 60
