@@ -1,74 +1,83 @@
-import { useEffect, useState } from "react";
-import api from "../api/client";
+import { useEffect, useState, useRef } from "react";
+import FocusForm from "../components/FocusForm";
+import { getSessions, stopSession, deleteSession } from "../api/referensiAPI";
 import type { FocusSession } from "../types/focus";
+import ConfirmationModal, { type ConfirmationModalRef } from "../components/ConfirmationModal";
+import ActiveSessionCard from "../components/ActiveSessionCard";
+import SessionHistoryCard from "../components/SessionHistoryCard";
 
 export default function FocusPage() {
   const [sessions, setSessions] = useState<FocusSession[]>([]);
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
+  const [now, setNow] = useState(Date.now());
+  const [selectedSessionId, setSelectedSessionId] = useState<number | null>(null);
+  const modalRef = useRef<ConfirmationModalRef>(null);
+
+  const fetchSessions = () =>
+    getSessions().then((res) => setSessions(res.data));
 
   useEffect(() => {
     fetchSessions();
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
-  const fetchSessions = async () => {
-    const res = await api.get<FocusSession[]>("/sessions");
-    setSessions(res.data);
+  const handleStopSession = (id: number) => {
+    stopSession(id).then(fetchSessions);
   };
 
-  const startSession = async () => {
-    await api.post("/sessions", {
-      title,
-      category,
-      start_time: new Date().toISOString(),
-    });
-
-    setTitle("");
-    setCategory("");
-    fetchSessions();
+  const handleDelete = async () => {
+    if (selectedSessionId) {
+      await deleteSession(selectedSessionId);
+      fetchSessions();
+      modalRef.current?.hideModal();
+    }
   };
 
-  const stopSession = async (id: number) => {
-    await api.put(`/sessions/${id}/stop`);
-    fetchSessions();
+  const openDeleteModal = (id: number) => {
+    setSelectedSessionId(id);
+    modalRef.current?.showModal();
   };
 
-  const deleteSession = async (id: number) => {
-    await api.delete(`/sessions/${id}`);
-    fetchSessions();
-  };
+  const activeSessions = sessions.filter((s) => !s.end_time);
+  const finishedSessions = sessions.filter((s) => s.end_time);
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Focus Tracker</h2>
+    <div className="min-h-screen gradient-bg-animated p-6">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="bg-white/30 backdrop-blur-md rounded-2xl ring-2 ring-white/50 shadow-lg shadow-white/80 p-6 space-y-4">
+          <FocusForm onSuccess={fetchSessions} />
 
-      <input
-        placeholder="Task title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+          {activeSessions.map((s) => (
+            <>
+              <div className="divider divider-info"></div>
+              <ActiveSessionCard
+                key={s.id}
+                session={s}
+                onStop={handleStopSession}
+                now={now}
+              />
+              <div className="divider divider-warning"></div>
+            </>
+          ))}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {finishedSessions.map((s) => (
+              <SessionHistoryCard
+                key={s.id}
+                session={s}
+                onDelete={openDeleteModal}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <ConfirmationModal
+        ref={modalRef}
+        onConfirm={handleDelete}
+        title="Delete Session"
+        message="Are you sure you want to delete this session?"
       />
-
-      <input
-        placeholder="Category"
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-      />
-
-      <button onClick={startSession}>Start</button>
-
-      <hr />
-
-      <ul>
-        {sessions.map((s) => (
-          <li key={s.id}>
-            <b>{s.title}</b> ({s.category})
-            {!s.end_time && (
-              <button onClick={() => stopSession(s.id)}>Stop</button>
-            )}
-            <button onClick={() => deleteSession(s.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }

@@ -1,11 +1,16 @@
 from sqlalchemy.orm import Session, joinedload
 from .models import FocusSession, Category
 from datetime import datetime
-from .schemas import FocusSessionCreate, CategoryCreate, CategoryUpdate
+from .schemas import FocusSessionCreate, CategoryUpdate
 
 
 def create_session(db: Session, data: FocusSessionCreate):
-    session = FocusSession(**data.dict())
+    session = FocusSession(
+        title=data.title,
+        category_id=data.category_id,
+        start_time=datetime.utcnow()
+    )
+
     db.add(session)
     db.commit()
     db.refresh(session)
@@ -18,7 +23,6 @@ def create_session(db: Session, data: FocusSessionCreate):
     )
 
     return session
-
 
 def get_sessions(db: Session):
     return (
