@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, TypeVar, Generic
+
+T = TypeVar('T')
 
 class CategoryBase(BaseModel):
     name: str
@@ -38,3 +40,17 @@ class FocusSessionResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class PaginatedResponse(BaseModel, Generic[T]):
+    page: int
+    limit: int
+    total: int
+    list: List[T]
+
+class StandardResponse(BaseModel, Generic[T]):
+    result: str
+    detail: str
+    code: int
+    version: Optional[str] = None
+    data: Optional[T] = None
+
