@@ -13,9 +13,15 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/sessions/insert", response_model=schemas.FocusSessionResponse)
+@router.post("/sessions/insert", response_model=schemas.StandardResponse[schemas.FocusSessionResponse])
 def create_focus_session(data: schemas.FocusSessionCreate, db: Session = Depends(get_db)):
-    return crud.create_session(db, data)
+    session = crud.create_session(db, data)
+    return schemas.StandardResponse(
+        code=201,
+        result="Sukses",
+        detail="Session successfully created.",
+        data=session
+    )
 
 @router.get("/sessions/browse", response_model=schemas.StandardResponse[schemas.PaginatedResponse[schemas.FocusSessionResponse]])
 def list_sessions(page: int = 1, limit: int = 9, db: Session = Depends(get_db)):
@@ -26,28 +32,49 @@ def list_sessions(page: int = 1, limit: int = 9, db: Session = Depends(get_db)):
         total=total,
         list=sessions
     )
-    return schemas.StandardResponse(data=paginated_data)
+    return schemas.StandardResponse(
+        code=200,
+        result="Sukses",
+        detail="Data(s) successfully fetched.",
+        data=paginated_data
+    )
 
-@router.put("/sessions/update/{session_id}/stop")
+@router.put("/sessions/update/{session_id}/stop", response_model=schemas.StandardResponse[schemas.FocusSessionResponse])
 def stop_focus_session(session_id: int, db: Session = Depends(get_db)):
     session = crud.stop_session(db, session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
-    return session
+    return schemas.StandardResponse(
+        code=200,
+        result="Sukses",
+        detail="Session successfully stopped.",
+        data=session
+    )
 
-@router.delete("/sessions/delete/{session_id}")
+@router.delete("/sessions/delete/{session_id}", response_model=schemas.StandardResponse[None])
 def delete_focus_session(session_id: int, db: Session = Depends(get_db)):
     success = crud.delete_session(db, session_id)
     if not success:
         raise HTTPException(status_code=404, detail="Session not found")
-    return {"message": "Deleted"}
+    return schemas.StandardResponse(
+        code=200,
+        result="Sukses",
+        detail="Session successfully deleted.",
+        data=None
+    )
 
-@router.post("/categories/insert", response_model=CategoryResponse)
+@router.post("/categories/insert", response_model=schemas.StandardResponse[schemas.CategoryResponse])
 def create_category(
     data: CategoryCreate,
     db: Session = Depends(get_db)
 ):
-    return crud.create_category(db, data)
+    category = crud.create_category(db, data)
+    return schemas.StandardResponse(
+        code=201,
+        result="Sukses",
+        detail="Category successfully created.",
+        data=category
+    )
 
 @router.get("/categories/browse", response_model=schemas.StandardResponse[schemas.PaginatedResponse[schemas.CategoryResponse]])
 def list_categories(page: int = 1, limit: int = 10, db: Session = Depends(get_db)):
@@ -58,16 +85,26 @@ def list_categories(page: int = 1, limit: int = 10, db: Session = Depends(get_db
         total=total,
         list=categories
     )
-    return schemas.StandardResponse(data=paginated_data)
+    return schemas.StandardResponse(
+        code=200,
+        result="Sukses",
+        detail="Data(s) successfully fetched.",
+        data=paginated_data
+    )
 
-@router.get("/categories/detail/{category_id}", response_model=CategoryResponse)
+@router.get("/categories/detail/{category_id}", response_model=schemas.StandardResponse[schemas.CategoryResponse])
 def get_category(category_id: int, db: Session = Depends(get_db)):
     category = crud.get_category(db, category_id)
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
-    return category
+    return schemas.StandardResponse(
+        code=200,
+        result="Sukses",
+        detail="Category successfully fetched.",
+        data=category
+    )
 
-@router.put("/categories/update/{category_id}", response_model=CategoryResponse)
+@router.put("/categories/update/{category_id}", response_model=schemas.StandardResponse[schemas.CategoryResponse])
 def update_category(
     category_id: int,
     data: CategoryUpdate,
@@ -76,10 +113,15 @@ def update_category(
     category = crud.update_category(db, category_id, data)
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
-    return category
+    return schemas.StandardResponse(
+        code=200,
+        result="Sukses",
+        detail="Category successfully updated.",
+        data=category
+    )
 
 
-@router.delete("/categories/detele/{category_id}")
+@router.delete("/categories/detele/{category_id}", response_model=schemas.StandardResponse[None])
 def delete_category(category_id: int, db: Session = Depends(get_db)):
     try:
         success = crud.delete_category(db, category_id)
@@ -89,4 +131,9 @@ def delete_category(category_id: int, db: Session = Depends(get_db)):
     if not success:
         raise HTTPException(status_code=404, detail="Category not found")
 
-    return {"message": "Deleted"}
+    return schemas.StandardResponse(
+        code=200,
+        result="Sukses",
+        detail="Category successfully deleted.",
+        data=None
+    )

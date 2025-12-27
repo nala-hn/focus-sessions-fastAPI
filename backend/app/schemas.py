@@ -48,9 +48,9 @@ class PaginatedResponse(BaseModel, Generic[T]):
     list: List[T]
 
 class StandardResponse(BaseModel, Generic[T]):
-    result: str = "Sukses"
-    detail: str = "Data(s) successfully fetched."
-    code: int = 200
+    result: str
+    detail: str
+    code: int
     version: Optional[str] = None
-    data: T
+    data: Optional[T] = None
 
