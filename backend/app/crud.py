@@ -25,10 +25,11 @@ def create_session(db: Session, data: FocusSessionCreate):
     return session
 
 def get_sessions(db: Session, page: int = 1, limit: int = 9):
+    offset = (page - 1) * limit
     return (
         db.query(FocusSession)
         .order_by(FocusSession.created_at.desc())
-        .offset(page)
+        .offset(offset)
         .limit(limit)
         .all()
     )
@@ -68,11 +69,12 @@ def create_category(db: Session, data: CategoryCreate):
     return category
 
 def get_categories(db: Session, page: int = 1, limit: int = 10):
+    offset = (page - 1) * limit
     return (
         db.query(Category)
         .filter(Category.flag_aktif == True)
         .order_by(Category.created_at.desc())
-        .offset(page)
+        .offset(offset)
         .limit(limit)
         .all()
     )
@@ -107,3 +109,4 @@ def delete_category(db: Session, category_id: int):
     category.flag_aktif = False
     db.commit()
     return True
+
