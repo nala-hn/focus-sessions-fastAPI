@@ -6,6 +6,10 @@ interface SessionHistoryCardProps {
 }
 
 export default function SessionHistoryCard({ session, onDelete }: SessionHistoryCardProps) {
+  const capitalizeWords = (str: string) => {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
   return (
     <div
       key={session.id}
@@ -13,8 +17,8 @@ export default function SessionHistoryCard({ session, onDelete }: SessionHistory
     >
       <div>
         <div>
-          <h3 className="font-semibold">{session.title}</h3>
-          <p className="text-sm text-gray-500">{session.category.name}</p>
+          <h3 className="font-semibold">{capitalizeWords(session.title)}</h3>
+          <p className="text-sm text-gray-500">{capitalizeWords(session.category.name)}</p>
         </div>
       </div>
       <button

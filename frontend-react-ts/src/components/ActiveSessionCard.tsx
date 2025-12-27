@@ -16,6 +16,10 @@ export default function ActiveSessionCard({ session, onStop, now }: ActiveSessio
     return `${h}h ${m}m ${s}s`;
   };
 
+  const capitalizeWords = (str: string) => {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
   return (
     <div
       key={session.id}
@@ -26,8 +30,8 @@ export default function ActiveSessionCard({ session, onStop, now }: ActiveSessio
           {calcDuration(session.start_time)}
         </p>
         <div style={{ display: "flex", justifyContent: "center", gap: "4px", marginTop: "8px" }}>
-          <div className="badge badge-soft badge-primary">{session.title}</div>
-          <div className="badge badge-soft badge-warning">{session.category.name}</div>
+          <div className="badge badge-soft badge-primary">{capitalizeWords(session.title)}</div>
+          <div className="badge badge-soft badge-warning">{capitalizeWords(session.category.name)}</div>
           <div
             onClick={() => onStop(session.id)}
             className="badge badge-soft badge-error cursor-pointer"
