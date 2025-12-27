@@ -49,11 +49,12 @@ def create_session(db: Session, data: FocusSessionCreate, owner_id: int):
 
     return session
 
-def get_sessions(db: Session, page: int = 1, limit: int = 9):
+def get_sessions(db: Session, owner_id: int, page: int = 1, limit: int = 9):
     offset = (page - 1) * limit
-    total = db.query(FocusSession).count()
+    total = db.query(FocusSession).filter(FocusSession.owner_id == owner_id).count()
     sessions = (
         db.query(FocusSession)
+        .filter(FocusSession.owner_id == owner_id)
         .order_by(FocusSession.created_at.desc())
         .offset(offset)
         .limit(limit)

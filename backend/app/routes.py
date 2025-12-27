@@ -51,7 +51,7 @@ def create_focus_session(data: schemas.FocusSessionCreate, db: Session = Depends
 
 @router.get("/sessions/browse", response_model=schemas.StandardResponse[schemas.PaginatedResponse[schemas.FocusSessionResponse]])
 def list_sessions(page: int = 1, limit: int = 9, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    sessions, total = crud.get_sessions(db, page=page, limit=limit)
+    sessions, total = crud.get_sessions(db, owner_id=current_user.id, page=page, limit=limit)
     paginated_data = schemas.PaginatedResponse(
         page=page,
         limit=limit,
