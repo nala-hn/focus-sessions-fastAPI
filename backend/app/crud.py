@@ -1,14 +1,39 @@
 from sqlalchemy.orm import Session, joinedload
-from .models import FocusSession, Category
+from . import models, schemas, security
+from .models import FocusSession, Category, User
 from datetime import datetime
-from .schemas import FocusSessionCreate, CategoryUpdate
+from .schemas import FocusSessionCreate, CategoryUpdate, UserCreate
 
 
-def create_session(db: Session, data: FocusSessionCreate):
+def get_user_by_email(db: Session, email: str):
+    return db.query(models.User).filter(models.User.email == email).first()
+
+def get_user_by_username(db: Session, username: str):
+    return db.query(models.User).filter(models.User.username == username).first()
+
+def create_user(db: Session, user: schemas.UserCreate):
+    hashed_password = security.get_password_hash(user.password)
+    db_user = models.User(email=user.email, hashed_password=hashed_password, username=user.username)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def authenticate_user(db: Session, username: str, password: str):
+    user = get_user_by_username(db, username)
+    if not user:
+        return False
+    if not security.verify_password(password, user.hashed_password):
+        return False
+    return user
+
+
+def create_session(db: Session, data: FocusSessionCreate, owner_id: int):
     session = FocusSession(
         title=data.title,
         category_id=data.category_id,
-        start_time=datetime.utcnow()
+        start_time=datetime.utcnow(),
+        owner_id=owner_id
     )
 
     db.add(session)
@@ -24,11 +49,12 @@ def create_session(db: Session, data: FocusSessionCreate):
 
     return session
 
-def get_sessions(db: Session, page: int = 1, limit: int = 9):
+def get_sessions(db: Session, owner_id: int, page: int = 1, limit: int = 9):
     offset = (page - 1) * limit
-    total = db.query(FocusSession).count()
+    total = db.query(FocusSession).filter(FocusSession.owner_id == owner_id).count()
     sessions = (
         db.query(FocusSession)
+        .filter(FocusSession.owner_id == owner_id)
         .order_by(FocusSession.created_at.desc())
         .offset(offset)
         .limit(limit)

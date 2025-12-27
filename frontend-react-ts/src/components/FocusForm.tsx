@@ -9,7 +9,7 @@ export default function FocusForm({ onSuccess }: { onSuccess: () => void }) {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    getCategories().then(res => setCategories(res.data))
+    getCategories().then(paginatedData => setCategories(paginatedData.list))
   }, [])
 
   const handleStart = async () => {

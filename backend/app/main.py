@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import router
+from .routes import router as api_router
+from .auth import router as auth_router
 from .database import engine
 from . import models
 from .schemas import StandardResponse
@@ -45,4 +46,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router)
+app.include_router(api_router, prefix="")
+app.include_router(auth_router, prefix="/auth")

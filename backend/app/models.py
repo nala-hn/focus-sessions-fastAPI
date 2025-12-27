@@ -19,6 +19,17 @@ class Category(Base):
         cascade="all, delete-orphan"
     )
 
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    email = Column(String(100), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True)
+
+    sessions = relationship("FocusSession", back_populates="owner")
+
 class FocusSession(Base):
     __tablename__ = "focus_sessions"
 
@@ -34,5 +45,8 @@ class FocusSession(Base):
     start_time = Column(DateTime, nullable=False)
     end_time = Column(DateTime)
     duration_minutes = Column(Integer)
+
+    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner = relationship("User", back_populates="sessions")
 
     created_at = Column(DateTime, server_default=func.now())
