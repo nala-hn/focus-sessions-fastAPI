@@ -5,6 +5,7 @@ import type { FocusSession } from "../types/focus";
 import ConfirmationModal, { type ConfirmationModalRef } from "../components/ConfirmationModal";
 import ActiveSessionCard from "../components/ActiveSessionCard";
 import SessionHistoryCard from "../components/SessionHistoryCard";
+import Pagination from "../components/Pagination";
 
 export default function FocusPage() {
   const [sessions, setSessions] = useState<FocusSession[]>([]);
@@ -12,8 +13,16 @@ export default function FocusPage() {
   const [selectedSessionId, setSelectedSessionId] = useState<number | null>(null);
   const modalRef = useRef<ConfirmationModalRef>(null);
 
-  const fetchSessions = () =>
-    getSessions().then((res) => setSessions(res.data));
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(9);
+
+  const fetchSessions = (page = 1) =>
+    getSessions(page, limit).then((paginatedData) => {
+      setSessions(paginatedData.list);
+      setTotalPages(Math.ceil(paginatedData.total / limit));
+      setCurrentPage(page);
+    });
 
   useEffect(() => {
     fetchSessions();
@@ -22,13 +31,13 @@ export default function FocusPage() {
   }, []);
 
   const handleStopSession = (id: number) => {
-    stopSession(id).then(fetchSessions);
+    stopSession(id).then(() => fetchSessions(currentPage));
   };
 
   const handleDelete = async () => {
     if (selectedSessionId) {
       await deleteSession(selectedSessionId);
-      fetchSessions();
+      fetchSessions(currentPage);
       modalRef.current?.hideModal();
     }
   };
@@ -45,7 +54,7 @@ export default function FocusPage() {
     <div className="min-h-screen gradient-bg-animated p-6">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="bg-white/30 backdrop-blur-md rounded-2xl ring-2 ring-white/50 shadow-lg shadow-white/80 p-6 space-y-4">
-          <FocusForm onSuccess={fetchSessions} />
+          <FocusForm onSuccess={() => fetchSessions(currentPage)} />
 
           {activeSessions.map((s) => (
             <>
@@ -68,6 +77,14 @@ export default function FocusPage() {
                 onDelete={openDeleteModal}
               />
             ))}
+          </div>
+
+          <div className="flex justify-center">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={fetchSessions}
+            />
           </div>
         </div>
       </div>
