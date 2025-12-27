@@ -1,18 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import FocusForm from "../components/FocusForm";
 import { getSessions, stopSession, deleteSession } from "../api/referensiAPI";
 import type { FocusSession } from "../types/focus";
-import ConfirmationModal from "../components/ConfirmationModal";
+import ConfirmationModal, { type ConfirmationModalRef } from "../components/ConfirmationModal";
 import ActiveSessionCard from "../components/ActiveSessionCard";
 import SessionHistoryCard from "../components/SessionHistoryCard";
 
 export default function FocusPage() {
   const [sessions, setSessions] = useState<FocusSession[]>([]);
   const [now, setNow] = useState(Date.now());
-  const [showModal, setShowModal] = useState(false);
-  const [selectedSessionId, setSelectedSessionId] = useState<number | null>(
-    null
-  );
+  const [selectedSessionId, setSelectedSessionId] = useState<number | null>(null);
+  const modalRef = useRef<ConfirmationModalRef>(null);
 
   const fetchSessions = () =>
     getSessions().then((res) => setSessions(res.data));
@@ -31,13 +29,13 @@ export default function FocusPage() {
     if (selectedSessionId) {
       await deleteSession(selectedSessionId);
       fetchSessions();
-      setShowModal(false);
+      modalRef.current?.hideModal();
     }
   };
 
   const openDeleteModal = (id: number) => {
     setSelectedSessionId(id);
-    setShowModal(true);
+    modalRef.current?.showModal();
   };
 
   const activeSessions = sessions.filter((s) => !s.end_time);
@@ -74,14 +72,12 @@ export default function FocusPage() {
         </div>
       </div>
 
-      {showModal && (
-        <ConfirmationModal
-          onConfirm={handleDelete}
-          onClose={() => setShowModal(false)}
-          title="Delete Session"
-          message="Are you sure you want to delete this session?"
-        />
-      )}
+      <ConfirmationModal
+        ref={modalRef}
+        onConfirm={handleDelete}
+        title="Delete Session"
+        message="Are you sure you want to delete this session?"
+      />
     </div>
   );
 }
