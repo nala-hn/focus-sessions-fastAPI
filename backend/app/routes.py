@@ -17,9 +17,16 @@ def get_db():
 def create_focus_session(data: schemas.FocusSessionCreate, db: Session = Depends(get_db)):
     return crud.create_session(db, data)
 
-@router.get("/sessions/browse", response_model=list[schemas.FocusSessionResponse])
+@router.get("/sessions/browse", response_model=schemas.StandardResponse[schemas.PaginatedResponse[schemas.FocusSessionResponse]])
 def list_sessions(page: int = 1, limit: int = 9, db: Session = Depends(get_db)):
-    return crud.get_sessions(db, page=page, limit=limit)
+    sessions, total = crud.get_sessions(db, page=page, limit=limit)
+    paginated_data = schemas.PaginatedResponse(
+        page=page,
+        limit=limit,
+        total=total,
+        list=sessions
+    )
+    return schemas.StandardResponse(data=paginated_data)
 
 @router.put("/sessions/update/{session_id}/stop")
 def stop_focus_session(session_id: int, db: Session = Depends(get_db)):
@@ -42,9 +49,16 @@ def create_category(
 ):
     return crud.create_category(db, data)
 
-@router.get("/categories/browse", response_model=list[CategoryResponse])
+@router.get("/categories/browse", response_model=schemas.StandardResponse[schemas.PaginatedResponse[schemas.CategoryResponse]])
 def list_categories(page: int = 1, limit: int = 10, db: Session = Depends(get_db)):
-    return crud.get_categories(db, page=page, limit=limit)
+    categories, total = crud.get_categories(db, page=page, limit=limit)
+    paginated_data = schemas.PaginatedResponse(
+        page=page,
+        limit=limit,
+        total=total,
+        list=categories
+    )
+    return schemas.StandardResponse(data=paginated_data)
 
 @router.get("/categories/detail/{category_id}", response_model=CategoryResponse)
 def get_category(category_id: int, db: Session = Depends(get_db)):
