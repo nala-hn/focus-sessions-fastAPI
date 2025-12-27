@@ -23,7 +23,7 @@ export default function ConfirmationModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center">
       <div className="bg-white rounded-lg p-6 shadow-xl">
         <h2 className="text-lg font-semibold mb-4">{title}</h2>
         <p className="mb-6">{message}</p>
