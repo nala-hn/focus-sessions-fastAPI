@@ -1,12 +1,7 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  OneToMany,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, } from 'typeorm';
 import { FocusSession } from '../focus/focus.entity';
 
-@Entity({ name: 'users' })
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -15,7 +10,13 @@ export class User {
   email: string;
 
   @Column({ name: 'hashed_password' })
-  hashedPassword: string;
+  password: string;
+
+  @Column({ name: 'is_active', default: true })
+  isActive: boolean;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
   @OneToMany(() => FocusSession, (session) => session.owner)
   focusSessions: FocusSession[];
