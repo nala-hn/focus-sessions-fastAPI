@@ -1,9 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { StandardResponseInterceptor } from './common/interceptors/standard-response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.useGlobalInterceptors(new StandardResponseInterceptor());
 
   const config = new DocumentBuilder()
     .setTitle('Focus Tracker API')

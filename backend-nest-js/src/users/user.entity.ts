@@ -1,10 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, } from 'typeorm';
 import { FocusSession } from '../focus/focus.entity';
 
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ length: 50 })
+  username: string;
 
   @Column({ unique: true })
   email: string;
@@ -14,9 +17,6 @@ export class User {
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
-
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
 
   @OneToMany(() => FocusSession, (session) => session.owner)
   focusSessions: FocusSession[];
