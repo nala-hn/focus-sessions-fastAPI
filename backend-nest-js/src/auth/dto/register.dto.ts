@@ -10,6 +10,9 @@ export class RegisterDto {
     example: 'user@mail.com',
   })
   email: string;
+  @ApiProperty({
+    example: 'password123',
+  })
   password: string;
 }
 

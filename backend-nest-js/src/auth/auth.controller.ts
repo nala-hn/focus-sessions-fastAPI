@@ -1,6 +1,6 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiBody } from '@nestjs/swagger';
 import { RegisterDto } from './dto/register.dto';
 
 @ApiTags('Auth')
@@ -9,12 +9,24 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @ApiBody({ type: RegisterDto })
   register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto.email, dto.password);
+    return this.authService.register(dto.username, dto.email, dto.password);
   }
 
   @Post('token')
-  login(@Body() body: { email: string; password: string }) {
-    return this.authService.login(body.email, body.password);
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        username: { type: 'string', example: 'user1' },
+        password: { type: 'string', example: 'password123' },
+      },
+      required: ['username', 'password'],
+    },
+    description: 'Login menggunakan form-data (bukan JSON)',
+  })
+  login(@Body() body: { username: string; password: string }) {
+    return this.authService.login(body.username, body.password);
   }
 }

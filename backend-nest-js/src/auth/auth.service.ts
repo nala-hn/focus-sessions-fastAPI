@@ -13,7 +13,7 @@ export class AuthService {
         private jwtService: JwtService,
     ) { }
 
-    async register(email: string, password: string) {
+    async register(username: string, email: string, password: string) {
         const existing = await this.userRepo.findOne({ where: { email } });
         if (existing) {
             throw new BadRequestException('Email already registered');
@@ -22,13 +22,15 @@ export class AuthService {
         const hashed = await bcrypt.hash(password, 10);
 
         const user = this.userRepo.create({
+            username,
             email,
             password: hashed,
+            isActive: true,
         });
 
         await this.userRepo.save(user);
 
-        return { message: 'User registered successfully' };
+        return { id: user.id, username: user.username, email: user.email };
     }
 
     async login(email: string, password: string) {

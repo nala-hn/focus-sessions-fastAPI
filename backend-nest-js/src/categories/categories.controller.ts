@@ -2,12 +2,15 @@ import { Controller, Post, Body, Get, Param, Put, Delete, Query, HttpCode } from
 import { CategoriesService } from './categories.service';
 import { CategoryCreateDto, CategoryUpdateDto, CategoryResponseDto } from './dto';
 import { StandardResponseDto, PaginatedResponseDto } from '../common/dto';
+import { ApiTags, ApiBody, ApiQuery, ApiParam } from '@nestjs/swagger';
 
+@ApiTags('Categories')
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post('insert')
+  @ApiBody({ type: CategoryCreateDto })
   async create(@Body() data: CategoryCreateDto): Promise<StandardResponseDto<CategoryResponseDto>> {
     const category = await this.categoriesService.create(data);
     return {
@@ -19,6 +22,8 @@ export class CategoriesController {
   }
 
   @Get('browse')
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   async findAll(
     @Query('page') page = 1,
     @Query('limit') limit = 10,
@@ -33,6 +38,7 @@ export class CategoriesController {
   }
 
   @Get('detail/:id')
+  @ApiParam({ name: 'id', type: Number })
   async findOne(@Param('id') id: number): Promise<StandardResponseDto<CategoryResponseDto>> {
     const category = await this.categoriesService.findOne(Number(id));
     return {
@@ -44,6 +50,8 @@ export class CategoriesController {
   }
 
   @Put('update/:id')
+  @ApiParam({ name: 'id', type: Number })
+  @ApiBody({ type: CategoryUpdateDto })
   async update(
     @Param('id') id: number,
     @Body() data: CategoryUpdateDto,
@@ -58,6 +66,7 @@ export class CategoriesController {
   }
 
   @Delete('detele/:id')
+  @ApiParam({ name: 'id', type: Number })
   @HttpCode(200)
   async remove(@Param('id') id: number): Promise<StandardResponseDto<null>> {
     await this.categoriesService.remove(Number(id));

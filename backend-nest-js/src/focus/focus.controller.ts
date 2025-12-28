@@ -3,15 +3,18 @@ import { FocusService } from './focus.service';
 import { FocusSessionCreateDto } from './dto/focus-session-create.dto';
 import { FocusSessionResponseDto } from './dto/focus-session-response.dto';
 import { StandardResponseDto, PaginatedResponseDto } from '../common/dto';
+import { ApiTags, ApiBody, ApiQuery, ApiParam } from '@nestjs/swagger';
 
 // Note: ownerId seharusnya diambil dari JWT, di sini sementara hardcode/demo
 const DEMO_OWNER_ID = 1;
 
+@ApiTags('Focus Sessions')
 @Controller('sessions')
 export class FocusController {
   constructor(private readonly focusService: FocusService) {}
 
   @Post('insert')
+  @ApiBody({ type: FocusSessionCreateDto })
   async create(@Body() data: FocusSessionCreateDto): Promise<StandardResponseDto<FocusSessionResponseDto>> {
     const session = await this.focusService.create(data, DEMO_OWNER_ID);
     return {
@@ -23,6 +26,8 @@ export class FocusController {
   }
 
   @Get('browse')
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 9 })
   async findAll(
     @Query('page') page = 1,
     @Query('limit') limit = 9,
@@ -37,6 +42,7 @@ export class FocusController {
   }
 
   @Put('update/:id/stop')
+  @ApiParam({ name: 'id', type: Number })
   async stopSession(@Param('id') id: number): Promise<StandardResponseDto<FocusSessionResponseDto>> {
     const session = await this.focusService.stopSession(Number(id), DEMO_OWNER_ID);
     return {
@@ -48,6 +54,7 @@ export class FocusController {
   }
 
   @Delete('delete/:id')
+  @ApiParam({ name: 'id', type: Number })
   @HttpCode(200)
   async remove(@Param('id') id: number): Promise<StandardResponseDto<null>> {
     await this.focusService.remove(Number(id), DEMO_OWNER_ID);
