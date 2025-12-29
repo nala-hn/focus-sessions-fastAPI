@@ -2,6 +2,7 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags, ApiBody } from '@nestjs/swagger';
 import { RegisterDto } from './dto/register.dto';
+import { OAuth2PasswordRequestFormDto } from './dto/oauth2-password-request-form.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -16,17 +17,10 @@ export class AuthController {
 
   @Post('token')
   @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        username: { type: 'string', example: 'user1' },
-        password: { type: 'string', example: 'password123' },
-      },
-      required: ['username', 'password'],
-    },
-    description: 'Login menggunakan form-data (bukan JSON)',
+    type: OAuth2PasswordRequestFormDto,
+    description: 'Login menggunakan application/x-www-form-urlencoded (seperti FastAPI OAuth2PasswordRequestForm)',
   })
-  login(@Body() body: { username: string; password: string }) {
+  login(@Body() body: OAuth2PasswordRequestFormDto) {
     return this.authService.login(body.username, body.password);
   }
 }

@@ -6,6 +6,11 @@ import { StandardResponseInterceptor } from './common/interceptors/standard-resp
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Enable urlencoded body parser for form submissions (like FastAPI OAuth2PasswordRequestForm)
+  const express = require('express');
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+
   app.useGlobalInterceptors(new StandardResponseInterceptor());
 
   const config = new DocumentBuilder()

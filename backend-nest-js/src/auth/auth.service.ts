@@ -33,21 +33,35 @@ export class AuthService {
         return { id: user.id, username: user.username, email: user.email };
     }
 
-    async login(email: string, password: string) {
-        const user = await this.userRepo.findOne({ where: { email } });
-        if (!user) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
+    async login(usernameOrEmail: string, password: string) {
+        try {
+            // Cari user berdasarkan username atau email
+            const user = await this.userRepo.findOne({
+                where: [
+                    { username: usernameOrEmail },
+                    { email: usernameOrEmail },
+                ],
+            });
+            if (!user) {
+                throw new UnauthorizedException('Invalid credentials');
+            }
 
-        const valid = await bcrypt.compare(password, user.password);
-        if (!valid) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
+            
 
-        const payload = { sub: user.email };
-        return {
-            access_token: this.jwtService.sign(payload),
-            token_type: 'bearer',
-        };
+            const valid = await bcrypt.compare(password, user.password);
+            if (!valid) {
+                throw new UnauthorizedException('Invalid credentials');
+            }
+
+            const payload = { sub: user.username };
+            
+            const token = this.jwtService.sign(payload);
+            return {
+                access_token: token,
+                token_type: 'bearer',
+            };
+        } catch (err) {
+            throw err;
+        }
     }
 }
